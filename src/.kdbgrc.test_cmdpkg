@@ -1,0 +1,22 @@
+[Breakpoint 0]
+Enabled=true
+File=test_cmdpkg.c
+Line=37
+Temporary=false
+
+[General]
+DebuggerCmdStr=
+DriverName=GDB
+FileVersion=1
+OptionsSelected=
+ProgramArgs=
+TTYLevel=7
+WorkingDirectory=
+
+[Memory]
+ColumnWidths=80,92
+Expression1=0x804a0a0
+Expression2=0x804b0f8
+Format1=19
+Format2=19
+NumExprs=2

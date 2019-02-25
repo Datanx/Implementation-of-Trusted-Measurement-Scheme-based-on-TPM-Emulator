@@ -1,0 +1,146 @@
+#include "OsstartPolicyOperator.h"
+
+int OsstartPolicyOperator::m_policy_pos_array[] = {
+	PLCY_POS_PC,
+    PLCY_POS_MB,
+    PLCY_POS_BIOS,
+    PLCY_POS_CPU,
+    PLCY_POS_HDD,
+    PLCY_POS_MEM,
+    PLCY_POS_NIC,
+    PLCY_POS_USB,
+    PLCY_POS_KERNEL,
+    PLCY_POS_GCC,
+    PLCY_POS_BASH,
+    PLCY_POS_OPENOFFICE,
+    PLCY_POS_FIREFOX
+};
+
+/*****************************************************
+*Function: Constructor.
+*Parameters:
+****Param 1: Policy string.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+OsstartPolicyOperator::OsstartPolicyOperator(std::string policy_str)
+{
+    this->m_policy_str = policy_str;
+    m_policy_usb_ptr = 0;
+    m_policy_mem_ptr = 0;
+    m_policy_nic_ptr = 0;
+    
+    for(int i=0; i<10; i++)
+    {
+        m_policy_mem[i]=0;
+        m_policy_nic[i]=0;
+    }
+    for(int i=0; i<20; i++)
+        m_policy_usb[i]=0;
+}
+
+/*****************************************************
+*Function: Apply the osstart policy set by server.
+*Parameters: No parameter.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+void OsstartPolicyOperator::ApplyPolicy()
+{
+	int policy_val = PLCY_CHKTYPE_IGNORE;
+	
+	for(int i=0; i < 8; i++)
+	{
+		policy_val = this->get_hwsw_policy(OsstartPolicyOperator::m_policy_pos_array[i]);
+		
+		switch(policy_val)
+		{
+			case PLCY_CHKTYPE_IGNORE:
+			case PLCY_CHKTYPE_UNDEF:
+				break;
+			case PLCY_CHKTYPE_CHECK:
+				break;
+			case PLCY_CHKTYPE_CHECKNOT:
+				break;
+		}
+	}
+}
+
+/*****************************************************
+*Function: Delete files in specific directory.
+*Parameters:
+****Param 1: Directory path.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+void OsstartPolicyOperator::delete_files_in_specific_dir(std::string path)
+{
+    //Make sure the path exists
+    if(access(path.c_str(), F_OK) < 0)
+        return;
+
+    //Delete all files in path
+    char cmd[256]={0};
+    sprintf(cmd, "rm -rf %s/*", path.c_str());
+    system(cmd);
+}
+
+/*****************************************************
+*Function: Get hw/sw policy value at specific position in policy string.
+*Parameters:
+****Param 1: Position in policy string.
+*Return: Policy value.
+*Remark: Nothing.
+*****************************************************/
+int OsstartPolicyOperator::get_hwsw_policy(int policy_pos)
+{
+    int policy_val = 0;
+
+    switch(policy_pos)
+    {
+        case PLCY_POS_PC:
+        case PLCY_POS_BIOS:
+        case PLCY_POS_MB:
+        case PLCY_POS_CPU:
+        case PLCY_POS_HDD:
+        case PLCY_POS_KERNEL:
+        case PLCY_POS_GCC:
+        case PLCY_POS_BASH:
+        case PLCY_POS_OPENOFFICE:
+        case PLCY_POS_FIREFOX:
+            policy_val = atoi(m_policy_str.substr(policy_pos, 1).c_str());
+            break;
+        case PLCY_POS_MEM:
+            for(int i=0; i<PLCY_POS_MELLEN; i++)
+            {
+                if(m_policy_str.substr(PLCY_POS_MEM + i, 1) == "0")
+                    return 0;
+                this->m_policy_mem[i] = atoi(m_policy_str.substr(PLCY_POS_MEM + i, 1).c_str());
+                this->m_policy_mem_ptr++;
+            }
+            break;
+        case PLCY_POS_USB:
+            for(int i=0; i<PLCY_POS_USBLEN; i++)
+            {
+                if(m_policy_str.substr(PLCY_POS_USB + i, 1) == "0")
+                    return 0;
+                this->m_policy_usb[i] = atoi(m_policy_str.substr(PLCY_POS_USB + i, 1).c_str());
+                this->m_policy_usb_ptr++;
+            }
+            break;
+        case PLCY_POS_NIC:
+            for(int i=0; i<PLCY_POS_NICLEN; i++)
+            {
+                if(m_policy_str.substr(PLCY_POS_NIC + i, 1) == "0")
+                    return 0;
+                this->m_policy_nic[i] = atoi(m_policy_str.substr(PLCY_POS_NIC + i, 1).c_str());
+                this->m_policy_nic_ptr++;
+            }
+            break;
+            break;
+        default:
+            break;
+    }
+    
+    return policy_val;
+}

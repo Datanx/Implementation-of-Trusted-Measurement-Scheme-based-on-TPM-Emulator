@@ -1,0 +1,50 @@
+[Breakpoint 0]
+Enabled=true
+File=test_osschk.cpp
+Line=4
+Temporary=false
+
+[Breakpoint 1]
+Enabled=true
+File=test_osschk.c
+Line=5
+Temporary=false
+
+[Breakpoint 2]
+Enabled=true
+File=test_osschk.c
+Line=22
+Temporary=false
+
+[Breakpoint 3]
+Enabled=true
+File=OsstartChecker.c
+Line=97
+Temporary=false
+
+[Breakpoint 4]
+Enabled=true
+File=HWCheck.c
+Line=14
+Temporary=false
+
+[General]
+DebuggerCmdStr=
+DriverName=GDB
+FileVersion=1
+OptionsSelected=
+ProgramArgs=
+TTYLevel=7
+WorkingDirectory=
+
+[Memory]
+ColumnWidths=80,0
+NumExprs=0
+
+[Watches]
+Expr0=((*(*(*poc).m_policy_dir_list_header).next).DATA_AREA).data
+Expr1=(char*)((*(*(*poc).m_policy_dir_list_header).next).DATA_AREA).data
+Expr2=(char*)((*(*(*poc).m_policy_dir_list_header).next.next).DATA_AREA).data
+Expr3=(char*)((*(*(*poc).m_policy_dir_list_header).next.next.next).DATA_AREA).data
+Expr4=(char*)((*(*(*poc).m_policy_dir_list_header).next.next.next.next).DATA_AREA).data
+Expr5=(char*)((*(*(*poc).m_policy_dir_list_header).next.next.next.next.next).DATA_AREA).data

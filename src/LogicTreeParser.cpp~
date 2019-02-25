@@ -1,0 +1,333 @@
+/* 
+ * File:   LogicTreeParser.cpp
+ * Author: root
+ * 
+ * Created on December 14, 2009, 7:32 PM
+ */
+
+#include "LogicTreeParser.h"
+
+std::string LogicTreeParser::m_opArray[6] = {"NULL", "AND", "OR", "NOT", "(", ")"};
+
+/*****************************************************
+*Function: Constructor.
+*Parameters:
+****Param 1: Logic string.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeParser::LogicTreeParser(std::string logicstr) {
+    this->m_subroot = NULL;
+    this->m_logic_str = logicstr;
+    this->m_logic_str_pointer = 0;
+
+    this->logic_string_trim();
+}
+
+LogicTreeParser::LogicTreeParser(const LogicTreeParser& orig) {
+}
+
+LogicTreeParser::~LogicTreeParser() {
+}
+
+/*****************************************************
+*Function: Trim the leading & ending space in m_logic_str.
+*Parameters: No parameter.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+void LogicTreeParser::logic_string_trim()
+{
+    std::string tmp_s;
+    int i = 0;
+
+    tmp_s.clear();
+    tmp_s = this->m_logic_str;
+
+    //LTrim
+    while(tmp_s[i] == ' ' || tmp_s[i] == '\t')
+	i++;
+    tmp_s = tmp_s.substr(i);
+
+    //RTrim
+    i = tmp_s.length() - 1;
+    while(tmp_s[i] == ' ' || tmp_s[i] == '\t')
+	i--;
+    tmp_s = tmp_s.substr(0, i + 1);
+
+    this->m_logic_str = tmp_s;
+}
+
+/*****************************************************
+*Function: Get the next token in m_logic_str.
+*Parameters:
+****Param 1(OUT): Next token in logic string.
+*Return: Token found status.
+*Remark: Nothing.
+*****************************************************/
+int LogicTreeParser::logic_string_get_next_token(std::string& token)
+{
+    token.clear();
+    
+    if(this->m_logic_str.empty())
+    {
+	return GETTOKEN_EMPTYSOURCE;
+    }
+
+    while(this->m_logic_str_pointer < this->m_logic_str.length())
+    {
+	//space found
+	if(this->m_logic_str[this->m_logic_str_pointer] == ' ' ||
+	  this->m_logic_str[this->m_logic_str_pointer] == '\t')
+	{
+	    //if token isn't empty, one token found
+	    if(!token.empty())
+	    {
+		this->m_logic_str_pointer++;
+		return GETTOKEN_TOKENFOUND;
+	    }
+	    else //jump over space
+	    {
+		this->m_logic_str_pointer++;
+	    }
+	}
+	else
+	{
+	    if(this->m_logic_str[this->m_logic_str_pointer] == '(' || 
+	       this->m_logic_str[this->m_logic_str_pointer] == ')')
+	    {
+		if(!token.empty())
+		    return GETTOKEN_TOKENFOUND;
+		else
+		{
+		    token.append(1, this->m_logic_str[this->m_logic_str_pointer]);
+		    this->m_logic_str_pointer++;
+		    return GETTOKEN_TOKENFOUND;
+		}
+	    }
+	    else
+	    {
+		token.append(1, this->m_logic_str[this->m_logic_str_pointer]);
+		this->m_logic_str_pointer ++;
+                if(this->m_logic_str_pointer >= this->m_logic_str.length())
+                    return GETTOKEN_TOKENFOUND;
+	    }
+	}//else
+    }//while
+    
+    return GETTOKEN_SOURCESCANFIN;
+}
+
+/*****************************************************
+*Function: Get operator priority by operator.
+*Parameters:
+****Param 1(IN): Logic operator.
+*Return: Operator priority.
+*Remark: Nothing.
+*****************************************************/
+int LogicTreeParser::logic_string_ret_op_priority(std::string op)
+{
+    if(op == "OR" || op == "or")
+        return CAL_PRIORITY_1;
+    else if(op == "AND" || op == "and")
+        return CAL_PRIORITY_2;
+    else if(op == "NOT" || op == "not")
+        return CAL_PRIORITY_3;
+
+    return CAL_PRIORITY_0;
+}
+
+/*****************************************************
+*Function: Get operator symbol by operator.
+*Parameters:
+****Param 1(IN): Logic operator.
+*Return: Operator symbol.
+*Remark: Nothing.
+*****************************************************/
+LogicOperator LogicTreeParser::logic_string_ret_op_sym(std::string op)
+{
+    if(op == "AND"  || op == "and")
+        return LO_AND;
+    else if(op == "OR" || op == "or")
+        return LO_OR;
+    else if(op == "NOT" || op == "not")
+        return LO_NOT;
+    else if(op == "(")
+        return LO_LBRACE;
+    else if(op == ")")
+        return LO_RBRACE;
+    return LO_NULL;
+}
+
+/*****************************************************
+*Function: Make subtree.
+*Parameters: No parameter.
+*Return: Subtree root pointer.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::logic_string_make_subtree()
+{
+    LogicTreeNode* subroot = NULL;
+    
+    if(m_opStack.top() == "NOT" || m_opStack.top() == "not")
+    {
+        subroot = this->logic_string_make_node(m_opStack.top(), m_nodeStack.top());
+        m_opStack.pop();
+        m_nodeStack.pop();
+    }
+    else
+    {
+        LogicTreeNode* opObj1 = m_nodeStack.top();
+        m_nodeStack.pop();
+        LogicTreeNode* opObj2 = m_nodeStack.top();
+        m_nodeStack.pop();
+        subroot = this->logic_string_make_node(m_opStack.top(), opObj1, opObj2);
+        m_opStack.pop();
+    }
+
+    return subroot;
+}
+
+/*****************************************************
+*Function: Make empty tree node.
+*Parameters: No parameter.
+*Return: New node pointer.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::logic_string_make_empty_node()
+{
+    LogicTreeNode* new_node = NULL;
+
+    new_node = new LogicTreeNode(TNT_EMPTY);
+
+    return new_node;
+}
+
+/*****************************************************
+*Function: Make single node by given token.(Used for making VAR node)
+*Parameters:
+****Param 1(IN): Token.
+*Return: New node pointer.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::logic_string_make_single_node(std::string token)
+{
+    LogicTreeNode* new_node = NULL;
+
+    new_node = new LogicTreeNode();
+    new_node->m_NodeValue = token;
+
+    return new_node;
+}
+
+/*****************************************************
+*Function: Make node with a left child of operator node, a right child of empty(Especially for the situation of NOT AND/OR/(xxx)).
+*Parameters:
+****Param 1(IN): Operator.
+****Param 2(IN): Operator node.
+*Return: New tree node.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::logic_string_make_node(std::string op, LogicTreeNode *opObj)
+{
+    LogicTreeNode* op_node = NULL;
+    LogicTreeNode* l_node = NULL;
+    LogicTreeNode* r_node = NULL;
+
+    op_node = new LogicTreeNode(TNT_SYM);
+    op_node->m_Operator = this->logic_string_ret_op_sym(op);
+
+    l_node = opObj;
+
+    r_node = this->logic_string_make_empty_node();
+
+    op_node->m_LChild = l_node;
+    op_node->m_RChild = r_node;
+    l_node->m_Parent = r_node->m_Parent = op_node;
+
+    return op_node;
+}
+
+/*****************************************************
+*Function: Make node with a left & right child of operator node.
+*Parameters:
+****Param 1(IN): Operator.
+****Param 2(IN): Operator node.
+****Param 3(IN): Operator node.
+*Return: New tree node.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::logic_string_make_node(std::string op, LogicTreeNode *opObj1, LogicTreeNode *opObj2)
+{
+    LogicTreeNode* op_node = NULL;
+    LogicTreeNode* l_node = NULL;
+    LogicTreeNode* r_node = NULL;
+
+    op_node = new LogicTreeNode(TNT_SYM);
+    op_node->m_Operator = this->logic_string_ret_op_sym(op);
+
+    l_node = opObj1;
+    r_node = opObj2;
+
+    op_node->m_LChild = l_node;
+    op_node->m_RChild = r_node;
+    l_node->m_Parent = r_node->m_Parent = op_node;
+
+    return op_node;
+}
+
+/*****************************************************
+*Function: Parse logic string into logic tree.
+*Parameters: No parameter.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+void LogicTreeParser::LogicStringParser()
+{
+    std::string token;
+    //push bottom symbol
+    m_opStack.push("@");
+    while(this->logic_string_get_next_token(token) != GETTOKEN_SOURCESCANFIN)
+    {
+        if(token == "(")
+            m_opStack.push(token);
+        else if(token == ")")
+        {
+            while(this->logic_string_ret_op_priority(m_opStack.top()) > CAL_PRIORITY_0)
+                m_nodeStack.push(this->logic_string_make_subtree());
+            
+            m_opStack.pop();    //pop left brace
+        }// if ")"
+        else if(token == "NOT" || token == "AND" || token == "OR" ||
+                token == "not" || token == "and" || token == "or")
+        {
+            while(this->logic_string_ret_op_priority(m_opStack.top()) >
+                    this->logic_string_ret_op_priority(token))
+                m_nodeStack.push(this->logic_string_make_subtree());
+            
+            m_opStack.push(token);
+        }
+        else
+            m_nodeStack.push(this->logic_string_make_single_node(token));
+    }//while
+
+    while(m_opStack.top() != "@")
+        m_nodeStack.push(this->logic_string_make_subtree());
+
+    this->m_subroot = m_nodeStack.top();
+    m_nodeStack.pop();
+
+    this->m_logic_str_pointer = 0;
+    return;
+}
+
+/*****************************************************
+*Function: Return logic tree root.
+*Parameters: No parameter.
+*Return: NULL.
+*Remark: Nothing.
+*****************************************************/
+LogicTreeNode* LogicTreeParser::GetLogicTree()
+{
+    return this->m_subroot;
+}

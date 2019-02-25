@@ -1,0 +1,28 @@
+//This class is used to implement "the reverse policy"
+//Generating the files containing dev hash value in /root/hw
+#ifndef OSSTARTPOLICYOP_H
+#define OSSTARTPOLICYOP_H
+
+#include <string>
+#include <unistd.h>
+#include <stdlib.h>
+#include "PolicyOperator.h"
+
+class OsstartPolicyOperator
+{
+public:
+    OsstartPolicyOperator(std::string policy_str);
+    void ApplyPolicy();
+private:
+    void delete_files_in_specific_dir(std::string path);
+    int get_hwsw_policy(int policy_pos);
+private:
+    std::string m_policy_str;
+    int m_policy_usb[20]; int m_policy_usb_ptr;
+    int m_policy_mem[10]; int m_policy_mem_ptr;
+    int m_policy_nic[10]; int m_policy_nic_ptr;
+public:
+	static int m_policy_pos_array[];
+};
+
+#endif

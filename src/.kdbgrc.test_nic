@@ -1,0 +1,54 @@
+[Breakpoint 0]
+Enabled=true
+File=test_nic.c
+Line=7
+Temporary=false
+
+[Breakpoint 1]
+Enabled=true
+File=nicinfo.c
+Line=73
+Temporary=false
+
+[Breakpoint 2]
+Enabled=true
+File=nicinfo.c
+Line=93
+Temporary=false
+
+[Breakpoint 3]
+Enabled=true
+File=nicinfo.c
+Line=142
+Temporary=false
+
+[Breakpoint 4]
+Enabled=true
+File=nicinfo.c
+Line=116
+Temporary=false
+
+[Breakpoint 5]
+Enabled=true
+File=nicinfo.c
+Line=244
+Temporary=false
+
+[General]
+DebuggerCmdStr=
+DriverName=GDB
+FileVersion=1
+OptionsSelected=
+ProgramArgs=
+TTYLevel=7
+WorkingDirectory=
+
+[Memory]
+ColumnWidths=80,0
+NumExprs=0
+
+[Watches]
+Expr0=PciDevTable[j].VenId
+Expr1=(sizeof(PciDevTable)/sizeof(PCI_DEVTABLE))
+Expr2=j
+Expr3=vendor_num

@@ -1,0 +1,6 @@
+#ifndef POLICYVALIDATOR_H
+#define POLICYVALIDATOR_H
+//This class used for executiion of policy validation
+
+
+#endif

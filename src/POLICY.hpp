@@ -1,0 +1,25 @@
+/* 
+ * File:   POLICY.hpp
+ * Author: jjdengjj
+ *
+ * Created on December 7, 2009, 4:22 PM
+ */
+
+#ifndef _POLICY_HPP
+#define	_POLICY_HPP
+
+#define	_POLICYCLIENT_HPP
+#define POLICY_HARDWARE_PC 0
+#define POLICY_HARDWARE_MB 1
+#define POLICY_HARDWARE_BIOS 2
+#define POLICY_HARDWARE_CPU 3
+#define POLICY_HARDWARE_HDD 4
+#define POLICY_HARDWARE_MEM 5
+#define POLICY_HARDWARE_MEME 6
+#define POLICY_HARDWARE_NIC 7
+#define POLICY_HARDWARE_NICE 8
+#define POLICY_HARDWARE_USB 9
+#define POLICY_HARDWARE_USBE 10
+
+#endif	/* _POLICY_HPP */
+
